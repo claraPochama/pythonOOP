@@ -1,5 +1,8 @@
 from module import user, accounts
 
+
+
+
 def display_menu():
     print("Option")
     print("1. Account detail")
@@ -14,22 +17,34 @@ def display_menu():
 
 def main():
     print("Welcome to CUBS online banking service\n")
-    display_menu()
+    #client = user(name, email, country, account_id)
+    bank_accounts = accounts()
     while True:
+        display_menu()
         command = int(input("Command: "))
-        if command.lower() == 1:
-            command_show(inventory)
-        elif command.lower() == 2:
+        if command == 1:
+            bank_accounts.show_account_detail()
+
+        elif command == 2:
             command_grab(inventory)
-        elif command.lower() == 3:
+
+        elif command == 3:
             command_edit(inventory)
-        elif command.lower() == 4:
+
+        elif command == 4:
             command_drop(inventory)
-        elif command.lower() == 5:
+
+        elif command == 5:
+            name = str(input("Client name: "))
+            email = str(input("Contact email: "))
+            country = str(input("Client country: "))
+            account_id = str(input("Account ID (unique): "))
+            bank_accounts.create_user(name, email, country, account_id)
+
+        elif command == 6:
             command_drop(inventory)
-        elif command.lower() == 6:
-            command_drop(inventory)
-        elif command.lower() == 7:
+
+        elif command == 7:
             break
         else:
             print("Not a valid command. Please try again.\n")
