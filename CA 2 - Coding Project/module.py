@@ -5,25 +5,49 @@ class user:
         self.client_region = client_region
         self.account_id = account_id
     def __str__(self):
-        return self.client_name + " (Account ID: " + self.account_id + ")"
+        return "Account ID: " + self.account_id + "/n Name: " + self.client_name + "/n Email: " + self.contact_email + "/n Region: " + self.client_region
 
 class accounts:
     def __init__(self): 
         self.account = []
         #self.account.append(user(user.client_name, user.contact_email, user.client_region, user.account_id, user.list_of_currencies, user.list_of_balance))
 
-    # option 1 
+    # option 1 + edit detail function
     def show_account_detail(self):
         if len(self.account) != 0:
             for user in self.account:
-                print(self.account)
+                print(user)
                 #print(user(user.client_name, user.contact_email, user.client_region, user.account_id, user.list_of_currencies, user.list_of_balance))
             print()
+            edit_option = str(input("Press E to edit Account detail or any key to go back to Main Menu. "))
+            if edit_option.lower() == "e":
+                self.edit_account_detail(str(input("Enter the account id you want to edit details:")))
+            else: return
         else:
             print("No account added yet.")
             print("Please go to Option 5 to create a new account. ")
             print()
-    
+    def edit_account_detail(self, account_to_be_edited):
+        #find the account to be edited
+        for user in self.account:
+            if user.account_id == account_to_be_edited:
+                account_to_be_edited = user
+                break
+        edit_detail = str(input("Enter name/email/region to change: "))
+        if edit_detail.lower() == "name":
+            new_detail = str(input("Enter a new name:"))
+            account_to_be_edited.client_name = new_detail
+        elif edit_detail.lower() == "email":
+            new_detail = str(input("Enter a new email:"))
+            account_to_be_edited.contact_email = new_detail
+        elif edit_detail.lower() == "region":
+            new_detail = str(input("Enter another region:"))
+            account_to_be_edited.client_region = new_detail
+        else:
+            print("Not a valid input. Returning to main menu.\n")
+            return
+        print("Account detail updated.\n")
+
     #option 5: user data collection
     def create_user(self, name: str, email: str, country: str, account_id: str):
         u = user(name, email, country, account_id)
