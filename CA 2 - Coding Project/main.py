@@ -1,4 +1,4 @@
-from module import user, accounts
+from module import User, Accounts
 
 def display_menu():
     print("Option")
@@ -15,7 +15,7 @@ def display_menu():
 def main():
     print("Welcome to CUBS online banking service\n")
     #client = user(name, email, country, account_id)
-    bank_accounts = accounts()
+    bank_accounts = Accounts()
     current_account = ""
     while True:
         display_menu()
@@ -33,13 +33,15 @@ def main():
             command_drop(inventory)
 
         elif command == 5:
-            name = str(input("Client name: "))
+            name = str(input("New Client name: "))
             email = str(input("Contact email: "))
             country = str(input("Client country: "))
-            account_id = str(input("Account ID (not changeable): "))
-            bank_accounts.create_user(name, email, country, account_id)
+            account_id = str(input("New Account ID (not changeable): "))
+            account_currency = str(input("Choose 1 currency (EUR/USD/BGP): "))
+            bank_accounts.create_user(name, email, country, account_id, account_currency)
             current_account = account_id
             print("Now switch to " + current_account "./n")
+
         elif command == 6:
             command_drop(inventory)
 
