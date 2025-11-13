@@ -2,54 +2,94 @@ from module import User, Accounts
 
 def display_menu():
     print("Option")
-    print("1. All Account detail")
+    print("1. Show Account detail")
     print("2. Withdraw cash")
     print("3. Deposit funds into your account")
     print("4. Convert funds to another account")
     print("5. Create a new account") # no account at first 
-    print("6. Switch to another account") # need [[]]
-    print("7. Exit the online service")
+    print("6. Switch to another account") 
+    print("7. Add new currency")
+    print("8. Account History")
+    print("9. Exit the online service")
     print()
 
 
 def main():
     print("Welcome to CUBS online banking service\n")
-    #client = user(name, email, country, account_id)
     bank_accounts = Accounts()
     current_account = ""
     while True:
+        if current_account != "":
+            print("Current account: " + current_account)
         display_menu()
-        command = int(input("Command: "))
+        try:
+            command = int(input("Command: "))
+        except ValueError:
+            print("Please enter a number.\n")
+            continue
+
         if command == 1:
-            bank_accounts.show_account_detail()
+            # 1. Account detail
+            bank_accounts.show_account_detail(current_account)
 
         elif command == 2:
-            command_grab(inventory)
+            # 2. Withdraw cash
+            if current_account == "":
+                print("No account selected. Please create or switch to an account first.\n")
+            else:
+                bank_accounts.withdraw_from_account(current_account)
 
         elif command == 3:
-            command_edit(inventory)
+            # 3. Deposit funds into your account
+            if current_account == "":
+                print("No account selected. Please create or switch to an account first.\n")
+            else:
+                bank_accounts.deposit_to_account(current_account)
 
         elif command == 4:
-            command_drop(inventory)
+            # 4. Convert funds to another account
+            if current_account == "":
+                print("No account selected. Please create or switch to an account first.\n")
+            else:
+                bank_accounts.convert_account_currency(current_account)
 
         elif command == 5:
-            name = str(input("New Client name: "))
+            # 5. Create a new account
+            name = str(input("Client name: "))
             email = str(input("Contact email: "))
             country = str(input("Client country: "))
-            account_id = str(input("New Account ID (not changeable): "))
-            account_currency = str(input("Choose 1 currency (EUR/USD/BGP): "))
-            bank_accounts.create_user(name, email, country, account_id, account_currency)
+            account_id = str(input("Account ID (not changeable): "))
+            bank_accounts.create_user(name, email, country, account_id)
             current_account = account_id
-            print("Now switch to " + current_account "./n")
+            print("Now switched to " + current_account + "\n")
 
         elif command == 6:
-            command_drop(inventory)
-
+            # 6. Switch to another account
+            if len(bank_accounts.account) == 0:
+                print("No account to switch. Please create one first.\n")
+            else:
+                account_id = str(input("Enter the account id you want to switch to: "))
+                if bank_accounts.get_account_by_id(account_id) == False:
+                    print("Account id not found.\n")
+                else:
+                    current_account = account_id
+                    print("Now switched to " + current_account + "\n")
         elif command == 7:
+            # 7. Add new currency
+            bank_accounts.add_new_currency_global()
+
+        elif command == 8:
+            # 8. Transaction History
+            print("Transaction History: \n")
+            bank_accounts.transaction_history(current_account)
+
+        elif command == 9:
+            # 9. Exit the online service
             break
+
         else:
             print("Not a valid command. Please try again.\n")
-    print("Bye!")
+    print("Thank you for using CUBS Online Banking today. Bye!\n")
    
     
 if __name__ == "__main__":
