@@ -61,7 +61,7 @@ class User:
 
         # do conversion
         converted = amount * rate
-        fee = converted * fee_percent
+        fee = round(converted * fee_percent, 2)
         converted = converted - fee
 
         # add to target
@@ -76,8 +76,8 @@ class User:
             self.list_of_currencies.append(currency_code)
             self.list_of_balances.append(0.0)
 
-    def records(self, action, result):
-        history = [action, result]
+    def records(self, action: str, result: str):
+        history = action + result + str("\n")
         self.list_of_history.append(history)
 
 # --------------------------------------------------------------------------
@@ -96,8 +96,7 @@ class Accounts:
             "GBP": 0.9    # POUND 
         }
 
-        # simple fee (1%) 
-        self.conversion_fee_percent = 0.01
+    
 
     # find user by account id
     def get_account_by_id(self, account_id):
@@ -105,6 +104,16 @@ class Accounts:
             if user.account_id == account_id:
                 return user
         return False
+    
+    #define fee amount per transaction
+    def conversion_fee_percent(self, transaction_amount):
+        if transaction_amount < 100:
+            fee = 0.01
+        elif transaction_amount >= 100 and transaction_amount <= 200: 
+            fee = 0.02
+        else:
+            fee = 0.03
+        return fee 
 
     # option 1: show all users and balances
     def show_account_detail(self, account_id):
@@ -128,7 +137,7 @@ class Accounts:
                 return
         else:
             print("No account added yet.")
-            print("Please go to Option 5 to create a new account. ")
+            print("Please go to Option 2 to create a new account. ")
             print()
 
     # edit simple user fields
@@ -174,7 +183,7 @@ class Accounts:
         print("Account detail updated.\n")
         user.records(edit_detail.lower() + " update", new_detail)
 
-    # option 5: create new user and set starting balances
+    # option 2: create new user and set starting balances
     def create_user(self, 
             name: str, 
             email: str, 
@@ -196,6 +205,7 @@ class Accounts:
             try:
                 amount = float(input("Initial balance for " + currency + ": "))
             except ValueError:
+                print("Invalid input. The initial amount is set as 0.0.")
                 amount = 0.0
             new_user.list_of_balances[i] = amount
 
@@ -209,7 +219,7 @@ class Accounts:
         new_user.records("New user " + name + " (" + account_id + ") ", "created.")
         print()
     
-    # option 2: withdraw cash
+    # option 3: withdraw cash
     def withdraw_from_account(self, account_id):
         user = self.get_account_by_id(account_id)
         if user == False:
@@ -235,12 +245,12 @@ class Accounts:
         ok = user.withdraw(index, amount)
         if ok:
             print("Withdraw done.")
-            user.records("Cash withdraw", amount + " " + currency_code)
+            user.records("Cash withdraw", str(amount) + " " + str(currency_code))
             user.show_balances()
         else:
             print("Not enough balance or wrong amount.\n")
 
-    # option 3: deposit funds
+    # option 4: deposit funds
     def deposit_to_account(self, account_id):
         user = self.get_account_by_id(account_id)
         if user == False:
@@ -266,12 +276,12 @@ class Accounts:
         ok = user.deposit(index, amount)
         if ok:
             print("Deposit done.")
-            user.records("Cash deposit", amount + " " + currency_code)
+            user.records("Cash deposit", str(amount) + " " + str(currency_code))
             user.show_balances()
         else:
             print("Wrong amount.\n")
 
-    # option 4: convert between currencies in same account
+    # option 5: convert between currencies in same account
     def convert_account_currency(self, account_id):
         user = self.get_account_by_id(account_id)
         if user == False:
@@ -308,6 +318,10 @@ class Accounts:
         except ValueError:
             print("Not a number.\n")
             return
+        
+        if amount <= 0:
+            print("Please input a valid amount. \n")
+            return
 
         from_index = user.list_of_currencies.index(from_currency)
         to_index = user.list_of_currencies.index(to_currency)
@@ -315,19 +329,90 @@ class Accounts:
         
         # factor from A to B = rate_to_euro[A] / rate_to_euro[B]
         rate = self.rate_to_euro[from_currency] / self.rate_to_euro[to_currency]
+        fee_percent = self.conversion_fee_percent(amount)
 
         transaction_status, fee = user.convert(
             from_index, to_index, 
             amount, rate, 
-            self.conversion_fee_percent)
+            fee_percent)
 
         if transaction_status:
             print("Conversion done.")
-            user.records("Conversion", amount + to_currency + " to " + to_index)
+            user.records("Conversion" + str(amount) + str(to_currency), " to " + str(to_index))
             print("Fee charged: " + str(fee))
             user.show_balances()
         else:
             print("Not enough balance or unexpected error.\n")
+
+
+    def transfer_fund(self, from_account_id, to_account_id):
+        to_user = self.get_account_by_id(to_account_id)
+        if to_user == False:
+            print("Account not found.\n")
+            return
+        from_user = self.get_account_by_id(from_account_id)
+        if to_user == from_user:
+            print("You cannot transfer fund to yourself. Please go to option 5 for converting different currencies.\n")
+            return
+        print(str(from_account_id) + ":")
+        from_user.show_balances()
+
+        from_currency = str(input("Convert FROM currency (ex. EUR): "))
+        to_currency = str(input("Convert TO currency (ex. USD): "))
+
+        from_currency = from_currency.upper()
+        to_currency = to_currency.upper()
+
+        if from_currency not in from_user.list_of_currencies:
+            print("From currency not in this account.\n")
+            return
+
+        if to_currency not in to_user.list_of_currencies:
+            print("To currency not in this account.\n")
+            return
+
+        # check we have rate to euro for both
+        if from_currency not in self.rate_to_euro or to_currency not in self.rate_to_euro:
+            print("No rate for this conversion.\n")
+            return
+
+        try:
+            amount = float(input("Amount to convert (from " + from_currency + "): "))
+        except ValueError:
+            print("Not a number.\n")
+            return
+        
+        if amount <= 0:
+            print("Please input a valid amount. \n")
+            return
+
+        from_index = from_user.list_of_currencies.index(from_currency)
+        if from_user.list_of_balances[from_index] < amount:
+            print("Sender has insufficient funds.\n")
+            return
+        
+        to_index = to_user.list_of_currencies.index(to_currency)
+
+        
+        # factor from A to B = rate_to_euro[A] / rate_to_euro[B]
+        rate = self.rate_to_euro[from_currency] / self.rate_to_euro[to_currency]
+        fee_percent = self.conversion_fee_percent(amount)
+        converted = amount * rate
+        fee = round(converted * fee_percent, 2)
+        converted = converted - fee
+
+        from_user.list_of_balances[from_index] -= amount
+        to_user.list_of_balances[to_index] += converted
+        print("Successfully transfered fund to: " + str(to_user.account_id),
+            ", amount: " + str(amount) + str(from_currency) 
+            + ", (fee:" + str(fee) + str(to_currency) + ".)")
+
+        from_user.records("Transfered fund to: " + str(to_user.account_id),
+            ", amount: " + str(amount) + str(from_currency) 
+            + ", (fee:" + str(fee) + str(to_currency) + ".)")
+        to_user.records("Received fund from: " + str(from_user.account_id),
+            ", amount: " + str(converted) + str(to_currency))
+
 
     # add new currency to whole system
     def add_new_currency_global(self):
@@ -364,7 +449,6 @@ class Accounts:
         if user == False:
             print("Account not found.\n")
             return
-        
-        for i in range(len(user.list_of_history)):
-            print(user.list_of_history[i] + "\n")
+                      
+        print(user.list_of_history)
         
