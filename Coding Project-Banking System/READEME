@@ -1,0 +1,37 @@
+CA 2 - Coding Project:– CUBS Banking Application
+IS6143 Foundations of Object Oriented Programming
+
+Date of submission: 	16/11/2025
+
+<Introduction>
+This project presents my prototype of the CUBS Banking console application, which focuses on system design, state management, and structured workflows within a constrained environment. It provides a simple banking environment where users can manage multiple currency accounts, view balances, transfer funds between accounts, and apply conversion rates and fees during the transferring. In addition to the minimum requirements from the lecturer, I also design more functions in the apps including transaction history tracking, the ability to edit account details, switching between multiple accounts, adding new currencies to the system, and applying input validation to prevent crashes. 
+The object-oriented approach is implemented by structuring on 2 classes, a user class and an account class in a separate module.py file and called by user’s command in the main function in main.py file. 
+
+<System Overview>
+The program begins in main.py, where the main menu is displayed and user input (option 1~9) determines the next action. Each menu option triggers a corresponding method in the Accounts class, such as creating users (option 2), withdrawing (option 3), depositing(option 4), converting currencies to another account (option 5), or adding new currencies (option 7). These methods then interact with the correspondent User object to update balances and records. 
+Once an action is selected, the Accounts class performs all validation and identifies the correct User account based on the account ID currently in use. After that, the operation is passed down to the User class, where the actual balance update, currency conversion, fee calculation, or history recording takes place. This separation ensures that the main function only takes parts in user interaction, Accounts manages system-level logic, and User handles the data itself. When the action is completed, the updated information is printed back to the console, and the user is returned to the main menu. 
+Aside from the basic requirements, some additional experimental features were implemented to make the application more complete and realistic, such as: Users can update their personal details directly from the system, allowing name, email, or region changes without recreating the account. A full transaction history is recorded for each User, capturing actions such as deposits, withdrawals, conversions, and updates. The system also supports adding new currencies globally, automatically updating all existing accounts with the new currency and a starting balance of zero. 
+
+<Implementation of Object-oriented Approach>
+The system is built around two classes: an Accounts class, which manages all user instances (the User class) and stores individual client information, balances, and transaction history. Below is a summary of the core features and the methods I used in my project. 
+1.	User Properties 
+Each User object stores: 
+  •	client_name 
+  •	contact_email 
+  •	client_region 
+  •	account_id (unchangeable)
+  •	list_of_currencies 
+  •	list_of_balances (balance for each currency, same index order as list_of_currencies)
+  •	list_of_history – records of all actions taken
+2.	Required Methods
+The actions are complied by functions: 
+  •	Show account details → Accounts.show_account_detail() + User.show_balances() 
+  •	Edit account info → Accounts.edit_account_detail() 
+  •	Create new user → Accounts.create_user() → initializes User object and sets starting balances
+  •	Deposit funds → Accounts.deposit_to_account() + User.deposit()
+  •	Withdraw funds → Accounts.withdraw_from_account() + User.withdraw()
+  •	Convert funds → Accounts.convert_account_currency() + User.convert()
+  •	Add new currency to the whole system → Accounts.add_new_currency_global() + User.add_currency()
+  •	View transaction history → Accounts.transaction_history() + User.records()
+  •	Update action history → User.records() for every operation 
+  •	Currency–balance index matching → lists stored with aligned indexes in User.list_of_currencies and User.list_of_balances
